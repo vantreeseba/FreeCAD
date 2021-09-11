@@ -96,6 +96,13 @@ def shape2polyhedron(shape):
         Deflection= params.GetFloat('meshdeflection',0.0)))
 
 def process_object(csg,ob):
+    def process_object(csg,ob):
+
+    if ob.TypeId == "App::DocumentObjectGroup" :
+        for subObj in ob.Group :
+            print("this is the sub obj", subObj)
+            process_object(csg, subObj)
+        return None
     
     print("Placement")
     print("Pos   : "+str(ob.Placement.Base))

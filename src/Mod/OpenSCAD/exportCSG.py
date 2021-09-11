@@ -29,15 +29,18 @@ __title__="FreeCAD OpenSCAD Workbench - CSG exporter Version"
 __author__ = "Keith Sloan <keith@sloan-home.co.uk>"
 __url__ = ["http://www.sloan-home.co.uk/Export/Export.html"]
 
-import FreeCAD
+import FreeCAD, os, Part, math
+from FreeCAD import Vector
 
 if FreeCAD.GuiUp:
+    import FreeCADGui
     gui = True
 else:
     gui = False
 
 #***************************************************************************
 # Tailor following to your requirements ( Should all be strings )          *
+global fafs
 #fafs = '$fa = 12, $fs = 2'
 #convexity = 'convexity = 10'
 params = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/OpenSCAD")
@@ -96,12 +99,13 @@ def shape2polyhedron(shape):
         Deflection= params.GetFloat('meshdeflection',0.0)))
 
 def process_object(csg,ob):
-    def process_object(csg,ob):
 
     if ob.TypeId == "App::DocumentObjectGroup" :
+        csg.write("//"+ob.Name+"\n"+"group() {\n")
         for subObj in ob.Group :
             print("this is the sub obj", subObj)
             process_object(csg, subObj)
+        csg.write("}\n")
         return None
     
     print("Placement")
@@ -263,7 +267,7 @@ def export(exportList,filename):
     csg.write("// CSG file generated from FreeCAD %s\n" % \
             '.'.join(FreeCAD.Version()[0:3]))
     #write initial group statements - not sure if required              
-    csg.write("group() {\n group(){\n")
+    csg.write("group() {\n")
     for ob in exportList:
         print(ob)
         print("Name : "+ob.Name)
@@ -273,7 +277,7 @@ def export(exportList,filename):
         process_object(csg,ob)
    
     # write closing group braces
-    csg.write("}\n}\n")
+    csg.write("}\n")
     # close file              
     csg.close()
-    FreeCAD.Console.PrintMessage("successfully exported" + " " + filename)
+    FreeCAD.Console.PrintMessage("successfully exported "+filename)
